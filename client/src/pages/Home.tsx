@@ -174,13 +174,12 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 flex flex-col md:flex-row items-center gap-8 max-w-3xl mx-auto">
-             {/* thyroid gland location illustration */}
-             <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Thyroid_gland_location.svg/512px-Thyroid_gland_location.svg.png" 
-              alt="Thyroid Gland Location" 
-              className="w-48 h-auto mix-blend-multiply"
-            />
+            <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 flex flex-col md:flex-row items-center gap-8 max-w-3xl mx-auto">
+               <img 
+                src="/images/anatomy.jpg" 
+                alt="Illustration Hypophyse et Thyroïde" 
+                className="w-64 h-auto rounded-2xl shadow-md"
+              />
             <div className="text-left space-y-4">
               <h3 className="text-2xl font-bold text-slate-900">Comprendre pour mieux agir</h3>
               <p className="text-slate-600">
