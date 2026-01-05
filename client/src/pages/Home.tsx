@@ -122,11 +122,9 @@ export default function Home() {
           
           <div className="relative">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-slate-200 relative z-10">
-               {/* Using abstract medical/nature image from Unsplash as filler since no personal photo provided */}
-               {/* wellness balance stones */}
                <img 
-                src="https://pixabay.com/get/g0c903990411e10e6a78b090b97ca5558ec6c2cf0319733b2afc5d0dfd83c8ec451f8fc2f24c6df82fab71e0b7fec25fdd7fc484a0e73018235266f6b7673cb47_1280.jpg" 
-                alt="Equilibre et Bien-être" 
+                src="/images/freddy.jpg" 
+                alt="Frédéric Niddam - Coach Santé Thyroïde" 
                 className="object-cover w-full h-full"
               />
             </div>
