@@ -158,7 +158,6 @@
         <h2>Consultations à Paris / Saint-Mandé / Vincennes</h2>
         <p>Consultations sur rendez-vous — avec preuves à l’appui. 
            Contactez-moi directement pour plus d’informations ou pour réserver un accompagnement personnalisé.</p>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Thyroid_gland_location.svg/512px-Thyroid_gland_location.svg.png" alt="Illustration de la glande thyroïde">
     </section>
 
     <!-- 💳 Section Paiement -->
