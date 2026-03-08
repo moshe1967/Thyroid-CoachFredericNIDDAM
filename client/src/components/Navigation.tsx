@@ -8,7 +8,11 @@ const links = [
   { href: "#about", label: "À propos" },
   { href: "#consultation", label: "Consultation" },
   { href: "#pricing", label: "Tarifs & Réservation" },
-  { href: "mailto:fniddam@gmail.com?subject=Demande%20de%20renseignements", label: "Contact", external: true },
+  {
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=fniddam@gmail.com&su=Demande%20de%20renseignements",
+    label: "Contact",
+    external: true,
+  },
 ];
 
 export function Navigation() {
@@ -24,7 +28,10 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const scrollToSection = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
     if (href.startsWith("#")) {
       e.preventDefault();
       const element = document.querySelector(href);
@@ -39,17 +46,17 @@ export function Navigation() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled 
-          ? "bg-white/90 backdrop-blur-md shadow-sm py-3" 
-          : "bg-transparent py-6"
+        isScrolled
+          ? "bg-white/90 backdrop-blur-md shadow-sm py-3"
+          : "bg-transparent py-6",
       )}
     >
       <div className="container px-4 mx-auto max-w-7xl flex items-center justify-between">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className={cn(
             "text-2xl font-display font-bold transition-colors",
-            isScrolled ? "text-primary" : "text-white text-shadow"
+            isScrolled ? "text-primary" : "text-white text-shadow",
           )}
         >
           Coach Santé Thyroïde
@@ -64,7 +71,7 @@ export function Navigation() {
               onClick={(e) => !link.external && scrollToSection(e, link.href)}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-accent relative group",
-                isScrolled ? "text-slate-600" : "text-white/90 text-shadow"
+                isScrolled ? "text-slate-600" : "text-white/90 text-shadow",
               )}
               target={link.external ? "_blank" : undefined}
               rel={link.external ? "noopener noreferrer" : undefined}
@@ -73,15 +80,15 @@ export function Navigation() {
               <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-accent scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
             </a>
           ))}
-          
+
           <a
             href="#pricing"
             onClick={(e) => scrollToSection(e, "#pricing")}
             className={cn(
               "px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-lg",
-              isScrolled 
-                ? "bg-primary text-white hover:bg-primary/90 hover:shadow-primary/25" 
-                : "bg-white text-primary hover:bg-white/90"
+              isScrolled
+                ? "bg-primary text-white hover:bg-primary/90 hover:shadow-primary/25"
+                : "bg-white text-primary hover:bg-white/90",
             )}
           >
             Prendre RDV
@@ -116,7 +123,9 @@ export function Navigation() {
                 <a
                   key={link.label}
                   href={link.href}
-                  onClick={(e) => !link.external && scrollToSection(e, link.href)}
+                  onClick={(e) =>
+                    !link.external && scrollToSection(e, link.href)
+                  }
                   className="text-lg font-medium text-slate-600 hover:text-primary py-2 block border-b border-slate-100"
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
