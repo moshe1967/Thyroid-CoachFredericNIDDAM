@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta name="google-site-verification" content="cuHP84kyB-  KTSXvJj0sBolmAkwEmPFuUq-e-eoQNBW0" />
+    <meta
+      name="google-site-verification"
+      content="cuHP84kyB-  KTSXvJj0sBolmAkwEmPFuUq-e-eoQNBW0"
+    />
     <meta charset="UTF-8" />
 
     <meta
@@ -16,8 +19,81 @@
       rel="stylesheet"
     />
   </head>
+
+  <script>
+    (function () {
+      if (!window.chatbase || window.chatbase("getState") !== "initialized") {
+        window.chatbase = (...arguments) => {
+          if (!window.chatbase.q) {
+            window.chatbase.q = [];
+          }
+          window.chatbase.q.push(arguments);
+        };
+        window.chatbase = new Proxy(window.chatbase, {
+          get(target, prop) {
+            if (prop === "q") {
+              return target.q;
+            }
+            return (...args) => target(prop, ...args);
+          },
+        });
+      }
+      const onLoad = function () {
+        const script = document.createElement("script");
+        script.src = "https://www.chatbase.co/embed.min.js";
+        script.id = "Yr9YfGjNm0Zc-C1lXatPb";
+        script.domain = "www.chatbase.co";
+        document.body.appendChild(script);
+      };
+      if (document.readyState === "complete") {
+        onLoad();
+      } else {
+        window.addEventListener("load", onLoad);
+      }
+    })();
+  </script>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+<div
+  style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 10px;
+  "
+>
+  <h4>Assistant Thyroïde</h4>
+
+  <input
+    id="userInput"
+    placeholder="Posez votre question..."
+    style="width: 70%"
+  />
+  <button onclick="sendMessage()">Envoyer</button>
+
+  <div id="chatResponse" style="margin-top: 10px; font-size: 14px"></div>
+</div>
+async function sendMessage(){ let message =
+document.getElementById("userInput").value; const response = await
+fetch("/chat",{ method:"POST", headers:{"Content-Type":"application/json"},
+body: JSON.stringify({message}) }); const data = await response.json();
+document.getElementById("chatResponse").innerText = data.reply; }
+
+<h2>Diagnostic Thyroïde Gratuit</h2>
+
+<p>
+  Recevez un diagnostic rapide pour comprendre votre fatigue ou votre prise de
+  poids.
+</p>
+
+<form action="https://formspree.io/f/mvzwazbr" method="POST">
+  <input type="email" name="email" placeholder="Entrez votre email" required />
+
+  <button type="submit">Recevoir mon diagnostic</button>
+</form>
