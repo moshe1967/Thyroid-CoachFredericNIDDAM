@@ -66,12 +66,13 @@
 
   <div id="chatResponse" style="margin-top: 10px; font-size: 14px"></div>
 </div>
+<script>
 async function sendMessage(){ let message =
 document.getElementById("userInput").value; const response = await
 fetch("/chat",{ method:"POST", headers:{"Content-Type":"application/json"},
 body: JSON.stringify({message}) }); const data = await response.json();
 document.getElementById("chatResponse").innerText = data.reply; }
-
+  <script>
 <h2>Diagnostic Thyroïde Gratuit</h2>
 
 <p>
