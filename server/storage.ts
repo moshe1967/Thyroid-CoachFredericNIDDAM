@@ -1,6 +1,5 @@
 import { type Inquiry, type InsertInquiry, inquiries } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
 
 export interface IStorage {
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
