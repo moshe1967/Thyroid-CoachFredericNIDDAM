@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 export interface IStorage {
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
   createLead(lead: InsertLead): Promise<Lead>;
+  findLeadByEmail(email: string): Promise<Lead | undefined>;
   requestFollowup(id: number): Promise<Lead | undefined>;
 }
 
@@ -22,6 +23,14 @@ export class DatabaseStorage implements IStorage {
       .insert(leads)
       .values(insertLead)
       .returning();
+    return lead;
+  }
+
+  async findLeadByEmail(email: string): Promise<Lead | undefined> {
+    const [lead] = await db
+      .select()
+      .from(leads)
+      .where(eq(leads.email, email.toLowerCase().trim()));
     return lead;
   }
 
