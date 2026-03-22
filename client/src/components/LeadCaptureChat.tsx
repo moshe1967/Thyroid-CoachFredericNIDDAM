@@ -39,7 +39,6 @@ export function LeadCaptureChat() {
   const [step, setStep] = useState<Step>("greeting");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [leadId, setLeadId] = useState<number | null>(null);
   const [leadEmail, setLeadEmail] = useState("");
   const [leadCity, setLeadCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -107,45 +106,51 @@ export function LeadCaptureChat() {
         );
         setStep("askConsent");
       }
-    } else if (step === "askConsent") {
-      const n = normalizeText(trimmed);
-      const isYes = ["oui", "yes", "o", "y", "ok", "dacord", "j accepte", "j'accepte", "accepte", "je suis d accord"].some((v) => n.includes(v));
-      const isNo = ["non", "no", "n", "refus", "pas"].some((v) => n === v || n.startsWith(v + " "));
+    }
 
-      if (isYes) {
-        try {
-          const res = await fetch("/save-lead", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: leadEmail,
-              city: leadCity,
-              consent: true,
-              followupRequested: false,
-              source: "agent_freddy",
-            }),
-          });
-          const data = await res.json();
-          if (res.ok) {
-            setLeadId(data.id);
-            await addBot(
-              "✅ Vous êtes bien enregistré(e). Cliquez ci-dessous si vous souhaitez que Frédéric vous contacte avec votre plan personnalisé."
-            );
-            setStep("registered");
-          } else {
-            await addBot("Une erreur est survenue. Veuillez réessayer dans un instant.");
-          }
-        } catch {
+    setIsLoading(false);
+  };
+
+  const handleConsent = async (accepted: boolean) => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    if (accepted) {
+      addUser("Oui, j'accepte");
+      try {
+        const res = await fetch("/save-lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: leadEmail,
+            city: leadCity,
+            consent: true,
+            source: "agent_freddy",
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          await addBot(
+            "✅ Vous êtes bien enregistré(e). Cliquez ci-dessous si vous souhaitez que Frédéric vous contacte avec votre plan personnalisé."
+          );
+          setStep("registered");
+        } else if (res.status === 409) {
+          await addBot(
+            "✅ Votre adresse e-mail est déjà enregistrée. Vous pouvez demander un suivi ci-dessous."
+          );
+          setStep("registered");
+        } else {
           await addBot("Une erreur est survenue. Veuillez réessayer dans un instant.");
         }
-      } else if (isNo) {
-        await addBot(
-          "Très bien, je respecte votre choix. Bonne journée et prenez soin de vous 🙏"
-        );
-        setStep("declined");
-      } else {
-        await addBot("Pourriez-vous répondre par oui ou non ?");
+      } catch {
+        await addBot("Une erreur est survenue. Veuillez réessayer dans un instant.");
       }
+    } else {
+      addUser("Non");
+      await addBot(
+        "Très bien, je respecte votre choix. Vos données ne seront pas conservées.\n\nBonne journée et prenez soin de vous 🙏"
+      );
+      setStep("declined");
     }
 
     setIsLoading(false);
@@ -256,13 +261,15 @@ export function LeadCaptureChat() {
               {step === "askConsent" && messages.length > 0 && !isLoading && (
                 <div className="flex gap-2 pt-1">
                   <button
-                    onClick={() => processInput("Oui, j'accepte")}
+                    data-testid="button-consent-yes"
+                    onClick={() => handleConsent(true)}
                     className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white text-xs font-medium rounded-full hover:bg-green-600 transition-colors"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" /> Oui, j'accepte
                   </button>
                   <button
-                    onClick={() => processInput("Non")}
+                    data-testid="button-consent-no"
+                    onClick={() => handleConsent(false)}
                     className="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-xs rounded-full hover:bg-slate-50 transition-colors"
                   >
                     Non
