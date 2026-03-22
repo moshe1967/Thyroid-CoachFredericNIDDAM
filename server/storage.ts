@@ -7,6 +7,7 @@ export interface IStorage {
   createLead(lead: InsertLead): Promise<Lead>;
   findLeadByEmail(email: string): Promise<Lead | undefined>;
   requestFollowup(id: number): Promise<Lead | undefined>;
+  requestFollowupByEmail(email: string): Promise<Lead | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -39,6 +40,15 @@ export class DatabaseStorage implements IStorage {
       .update(leads)
       .set({ followupRequested: true })
       .where(eq(leads.id, id))
+      .returning();
+    return lead;
+  }
+
+  async requestFollowupByEmail(email: string): Promise<Lead | undefined> {
+    const [lead] = await db
+      .update(leads)
+      .set({ followupRequested: true })
+      .where(eq(leads.email, email.toLowerCase().trim()))
       .returning();
     return lead;
   }

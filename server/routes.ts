@@ -110,6 +110,18 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/follow-up", async (req, res) => {
+    const email = req.body?.email;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+    const lead = await storage.requestFollowupByEmail(email);
+    if (!lead) {
+      return res.status(404).json({ success: false, message: "Email not found" });
+    }
+    return res.json({ success: true });
+  });
+
   app.post("/api/leads/:id/followup", async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);

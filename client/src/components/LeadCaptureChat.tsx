@@ -152,16 +152,23 @@ export function LeadCaptureChat() {
   };
 
   const handleFollowup = async () => {
-    if (!leadId || isLoading) return;
+    if (isLoading) return;
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/leads/${leadId}/followup`, { method: "POST" });
-      if (res.ok) {
+      const res = await fetch("/follow-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: leadEmail }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
         setStep("followupSent");
         await addBot(
           `Parfait 🎯 Votre demande de suivi a bien été enregistrée.\n\nFrédéric Niddam vous contactera très prochainement à l'adresse ${leadEmail} avec votre plan d'optimisation thyroïdienne personnalisé.\n\nMerci de votre confiance 🙏`,
           0
         );
+      } else {
+        await addBot("Une erreur est survenue. Veuillez réessayer.");
       }
     } catch {
       await addBot("Une erreur est survenue. Veuillez réessayer.");
