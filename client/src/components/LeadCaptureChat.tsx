@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, CheckCircle2 } from "lucide-react";
 
@@ -19,6 +19,18 @@ interface Message {
 
 const VALID_CITIES = ["paris", "vincennes", "saint-mande", "saint mandé", "saint mande"];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const INACTIVITY_DELAY_MS = 30_000;
+
+const INACTIVITY_NUDGES: Partial<Record<Step, string>> = {
+  greeting:
+    "Vous êtes toujours là ? 😊 Beaucoup de nos clients ont retrouvé leur énergie grâce à un suivi personnalisé. Puis-je vous aider ?",
+  askCity:
+    "Je suis disponible 24h/24 pour vous aider 🕐 Dans quelle ville êtes-vous situé(e) — Paris, Vincennes ou Saint-Mandé ?",
+  askEmail:
+    "Votre plan thyroïdien personnalisé n'attend plus que vous ✨ Quel est votre e-mail ?",
+  askConsent:
+    "Pas de pression 😊 Un simple « Oui » vous donnera accès à votre plan d'optimisation thyroïdienne gratuit.",
+};
 
 function normalizeText(input: string): string {
   return input
@@ -31,7 +43,7 @@ function normalizeText(input: string): string {
 
 function isValidCity(input: string): boolean {
   const normalized = normalizeText(input);
-  return VALID_CITIES.some((c) => normalizeText(c) === normalized || normalized === normalizeText(c));
+  return VALID_CITIES.some((c) => normalizeText(c) === normalized);
 }
 
 export function LeadCaptureChat() {
@@ -43,7 +55,14 @@ export function LeadCaptureChat() {
   const [leadCity, setLeadCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [started, setStarted] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stepRef = useRef<Step>("greeting");
+  const isLoadingRef = useRef(false);
+
+  stepRef.current = step;
+  isLoadingRef.current = isLoading;
 
   const addBot = (text: string, delay = 500) => {
     return new Promise<void>((resolve) => {
@@ -58,61 +77,94 @@ export function LeadCaptureChat() {
     setMessages((prev) => [...prev, { from: "user", text }]);
   };
 
+  const clearInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleInactivityNudge = useCallback(() => {
+    clearInactivityTimer();
+    inactivityTimerRef.current = setTimeout(async () => {
+      const currentStep = stepRef.current;
+      const currentlyLoading = isLoadingRef.current;
+      const nudge = INACTIVITY_NUDGES[currentStep];
+      if (!nudge || currentlyLoading) return;
+      setMessages((prev) => [...prev, { from: "bot", text: nudge }]);
+    }, INACTIVITY_DELAY_MS);
+  }, [clearInactivityTimer]);
+
   useEffect(() => {
     if (open && !started) {
       setStarted(true);
       addBot(
-        "Bonjour 👋 Souffrez-vous de fatigue, de prise de poids ou de symptômes liés à la thyroïde ?",
+        "Bonjour 👋 Je suis l'assistant de Frédéric Niddam, coach spécialisé en thyroïde.\n\nSouffrez-vous de fatigue persistante, de prise de poids inexpliquée ou d'autres symptômes thyroïdiens ?",
         400
-      );
+      ).then(() => scheduleInactivityNudge());
     }
-  }, [open, started]);
+    if (!open) {
+      clearInactivityTimer();
+    }
+  }, [open, started, scheduleInactivityNudge, clearInactivityTimer]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  const TERMINAL_STEPS: Step[] = ["cityRejected", "declined", "followupSent", "registered"];
+
   const processInput = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
+    clearInactivityTimer();
     setInput("");
     addUser(trimmed);
     setIsLoading(true);
 
     if (step === "greeting") {
-      await addBot("Pour mieux vous aider, pourriez-vous me dire dans quelle ville vous habitez ?");
+      await addBot(
+        "Super, je suis là pour vous aider 💙\n\nPour que Frédéric puisse vous accompagner, j'ai besoin de savoir dans quelle ville vous habitez."
+      );
       setStep("askCity");
     } else if (step === "askCity") {
       if (isValidCity(trimmed)) {
         setLeadCity(trimmed);
         await addBot(
-          "Je peux vous envoyer un plan personnalisé d'optimisation thyroïdienne. Quelle est votre adresse e-mail ?"
+          "Parfait ! Frédéric accompagne des patients dans votre secteur 🎯\n\nPour vous envoyer votre plan personnalisé d'optimisation thyroïdienne, quelle est votre adresse e-mail ?"
         );
         setStep("askEmail");
       } else {
         await addBot(
-          "Pour le moment, notre accompagnement est uniquement disponible pour les personnes situées à Paris, Vincennes ou Saint-Mandé. Bonne journée 🙏"
+          "Je suis désolé(e), notre accompagnement est pour l'instant disponible uniquement à Paris, Vincennes et Saint-Mandé.\n\nBonne journée et prenez soin de vous 🙏"
         );
         setStep("cityRejected");
       }
     } else if (step === "askEmail") {
       if (!EMAIL_REGEX.test(trimmed)) {
-        await addBot("Cette adresse e-mail ne semble pas valide. Pourriez-vous la vérifier ?");
+        await addBot(
+          "Hmm, cette adresse e-mail ne semble pas correcte 🤔 Pourriez-vous la vérifier et réessayer ?"
+        );
       } else {
         setLeadEmail(trimmed);
         await addBot(
-          "Acceptez-vous de recevoir des conseils de santé et des e-mails de suivi de la part de Frédéric Niddam ?\n\n📋 Conformément au RGPD, vos données ne seront utilisées qu'à cette fin et ne seront jamais partagées avec des tiers."
+          "Excellent ! Une dernière étape 📋\n\nAcceptez-vous de recevoir des conseils santé et un suivi personnalisé de la part de Frédéric Niddam ?\n\n🔒 Conformément au RGPD, vos données restent strictement confidentielles et ne seront jamais partagées."
         );
         setStep("askConsent");
       }
     }
 
     setIsLoading(false);
+
+    if (!TERMINAL_STEPS.includes(step)) {
+      scheduleInactivityNudge();
+    }
   };
 
   const handleConsent = async (accepted: boolean) => {
     if (isLoading) return;
+    clearInactivityTimer();
     setIsLoading(true);
 
     if (accepted) {
@@ -131,24 +183,28 @@ export function LeadCaptureChat() {
         const data = await res.json();
         if (res.ok && data.success) {
           await addBot(
-            "✅ Vous êtes bien enregistré(e). Cliquez ci-dessous si vous souhaitez que Frédéric vous contacte avec votre plan personnalisé."
+            "✅ Vous êtes bien enregistré(e) — merci pour votre confiance !\n\nCliquez ci-dessous si vous souhaitez que Frédéric vous contacte personnellement avec votre plan d'optimisation thyroïdienne."
           );
           setStep("registered");
         } else if (res.status === 409) {
           await addBot(
-            "✅ Votre adresse e-mail est déjà enregistrée. Vous pouvez demander un suivi ci-dessous."
+            "✅ Votre adresse e-mail est déjà dans notre système.\n\nVous pouvez demander un suivi personnalisé ci-dessous 👇"
           );
           setStep("registered");
         } else {
-          await addBot("Une erreur est survenue. Veuillez réessayer dans un instant.");
+          await addBot(
+            "Une erreur est survenue de notre côté 😔 Veuillez réessayer dans un instant."
+          );
         }
       } catch {
-        await addBot("Une erreur est survenue. Veuillez réessayer dans un instant.");
+        await addBot(
+          "Une erreur est survenue de notre côté 😔 Veuillez réessayer dans un instant."
+        );
       }
     } else {
       addUser("Non");
       await addBot(
-        "Très bien, je respecte votre choix. Vos données ne seront pas conservées.\n\nBonne journée et prenez soin de vous 🙏"
+        "Très bien, je respecte entièrement votre choix 🙏\n\nVos données ne seront pas conservées.\n\nSi vous changez d'avis, n'hésitez pas à revenir. Bonne journée et prenez soin de vous !"
       );
       setStep("declined");
     }
@@ -158,6 +214,7 @@ export function LeadCaptureChat() {
 
   const handleFollowup = async () => {
     if (isLoading) return;
+    clearInactivityTimer();
     setIsLoading(true);
     try {
       const res = await fetch("/follow-up", {
@@ -169,7 +226,7 @@ export function LeadCaptureChat() {
       if (res.ok && data.success) {
         setStep("followupSent");
         await addBot(
-          `Parfait 🎯 Votre demande de suivi a bien été enregistrée.\n\nFrédéric Niddam vous contactera très prochainement à l'adresse ${leadEmail} avec votre plan d'optimisation thyroïdienne personnalisé.\n\nMerci de votre confiance 🙏`,
+          `🎯 Parfait ! Votre demande de suivi est bien enregistrée.\n\nFrédéric Niddam vous contactera très prochainement à l'adresse ${leadEmail} avec votre plan d'optimisation thyroïdienne personnalisé.\n\nMerci de votre confiance — vous faites le bon choix pour votre santé 🙏`,
           0
         );
       } else {
@@ -205,7 +262,7 @@ export function LeadCaptureChat() {
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ duration: 0.22 }}
             className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl shadow-blue-900/20 border border-slate-100 flex flex-col overflow-hidden"
-            style={{ height: "500px" }}
+            style={{ height: "520px" }}
           >
             <div className="bg-gradient-to-r from-primary to-blue-800 px-5 py-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
@@ -214,7 +271,7 @@ export function LeadCaptureChat() {
                 </div>
                 <div>
                   <p className="text-white font-semibold text-sm leading-none">Assistant Thyroïde</p>
-                  <p className="text-blue-200 text-xs mt-0.5">Frédéric Niddam</p>
+                  <p className="text-blue-200 text-xs mt-0.5">Disponible 24h/24 · Frédéric Niddam</p>
                 </div>
               </div>
               <button
@@ -244,13 +301,15 @@ export function LeadCaptureChat() {
               {step === "greeting" && messages.length > 0 && !isLoading && (
                 <div className="flex gap-2 flex-wrap pt-1">
                   <button
+                    data-testid="button-greeting-yes"
                     onClick={() => processInput("Oui, j'ai ces symptômes")}
                     className="px-3 py-1.5 bg-white border border-primary text-primary text-xs rounded-full hover:bg-primary hover:text-white transition-colors"
                   >
                     Oui, j'ai ces symptômes
                   </button>
                   <button
-                    onClick={() => processInput("Je voudrais juste des informations")}
+                    data-testid="button-greeting-info"
+                    onClick={() => processInput("Je voudrais des informations")}
                     className="px-3 py-1.5 bg-white border border-slate-300 text-slate-500 text-xs rounded-full hover:bg-slate-100 transition-colors"
                   >
                     Juste des informations
@@ -280,6 +339,7 @@ export function LeadCaptureChat() {
               {step === "registered" && !isLoading && (
                 <div className="flex justify-start pt-1">
                   <button
+                    data-testid="button-followup"
                     onClick={handleFollowup}
                     className="px-5 py-2.5 bg-accent text-accent-foreground text-sm font-semibold rounded-xl hover:bg-accent/90 transition-colors shadow-md shadow-accent/20"
                   >
@@ -311,6 +371,7 @@ export function LeadCaptureChat() {
                   className="flex gap-2"
                 >
                   <input
+                    data-testid="input-chat"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder={inputPlaceholder}
@@ -318,6 +379,7 @@ export function LeadCaptureChat() {
                     disabled={isLoading}
                   />
                   <button
+                    data-testid="button-send"
                     type="submit"
                     disabled={!input.trim() || isLoading}
                     className="w-9 h-9 bg-primary text-white rounded-xl flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-40 flex-shrink-0"
