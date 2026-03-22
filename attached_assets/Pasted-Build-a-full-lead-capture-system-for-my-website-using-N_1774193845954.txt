@@ -1,0 +1,169 @@
+Build a full lead capture system for my website using Node.js, Express, and Replit Database.
+
+GOAL:
+Capture user emails from a chatbot and store them securely, with a working follow-up button.
+
+TECH:
+
+* Node.js
+* Express
+* @replit/database
+
+---
+
+## BACKEND REQUIREMENTS
+
+1. Setup Express server
+
+2. Install and use Replit Database:
+
+```javascript
+import Database from "@replit/database";
+const db = new Database();
+```
+
+3. Create endpoint POST /save-lead
+
+Input JSON:
+{
+"email": "string",
+"city": "string",
+"consent": true
+}
+
+4. VALIDATION:
+
+* Accept ONLY: Paris, Vincennes, Saint-Mandé
+* Reject others with error message
+* Email must be valid
+* Consent must be true
+
+5. STORE DATA:
+
+```javascript
+await db.set(email, {
+  city,
+  consent,
+  createdAt: new Date()
+});
+```
+
+6. RESPONSE:
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## FOLLOW-UP ENDPOINT
+
+Create POST /follow-up
+
+```javascript
+app.post("/follow-up", async (req, res) => {
+  const { email } = req.body;
+
+  console.log("Follow-up requested:", email);
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## FRONTEND REQUIREMENTS
+
+Create a button:
+
+```html
+<button id="followBtn">
+  Me faire suivre par Frédéric
+</button>
+```
+
+Add JavaScript:
+
+```javascript
+document.getElementById("followBtn").addEventListener("click", async () => {
+  const email = window.user_email;
+
+  const res = await fetch("/follow-up", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert("✅ Frédéric va vous recontacter !");
+  }
+});
+```
+
+---
+
+## CHATBOT INTEGRATION
+
+When user provides email + city + consent:
+
+```javascript
+await fetch("/save-lead", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    email: user_email,
+    city: user_city,
+    consent: true
+  })
+});
+```
+
+---
+
+## DEBUGGING
+
+Add logs:
+
+```javascript
+console.log("Saving:", email, city, consent);
+```
+
+---
+
+## BONUS (IMPORTANT)
+
+Create GET /leads to display all stored emails:
+
+```javascript
+app.get("/leads", async (req, res) => {
+  const keys = await db.list();
+  let results = [];
+
+  for (let key of keys) {
+    const value = await db.get(key);
+    results.push({ email: key, ...value });
+  }
+
+  res.json(results);
+});
+```
+
+---
+
+## IMPORTANT
+
+* Fix all JSON syntax errors
+* Ensure buttons trigger API calls
+* Ensure database writes correctly
+* Code must run immediately on Replit
+* Clean and production-ready
+
+---

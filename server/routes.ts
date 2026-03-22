@@ -67,6 +67,8 @@ export async function registerRoutes(
 
     const { email, city, consent, source } = parsed.data;
 
+    console.log("Saving:", email, city, consent);
+
     // Consent guard (belt-and-suspenders — schema already enforces this)
     if (!consent) {
       return res.status(400).json({
@@ -110,11 +112,17 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/leads", async (_req, res) => {
+    const allLeads = await storage.getAllLeads();
+    return res.json(allLeads);
+  });
+
   app.post("/follow-up", async (req, res) => {
     const email = req.body?.email;
     if (!email || typeof email !== "string") {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
+    console.log("Follow-up requested:", email);
     const lead = await storage.requestFollowupByEmail(email);
     if (!lead) {
       return res.status(404).json({ success: false, message: "Email not found" });
