@@ -24,6 +24,7 @@ export const leads = pgTable("leads", {
   city: text("city").notNull(),
   consent: boolean("consent").notNull().default(false),
   followupRequested: boolean("followup_requested").notNull().default(false),
+  source: text("source"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

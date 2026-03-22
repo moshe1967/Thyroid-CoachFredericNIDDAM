@@ -38,6 +38,19 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/save-lead", async (req, res) => {
+    try {
+      const input = insertLeadSchema.parse(req.body);
+      const lead = await storage.createLead(input);
+      res.status(201).json(lead);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
+  });
+
   app.post("/api/leads/:id/followup", async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);

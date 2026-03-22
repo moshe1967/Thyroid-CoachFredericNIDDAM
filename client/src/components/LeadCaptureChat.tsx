@@ -114,7 +114,7 @@ export function LeadCaptureChat() {
 
       if (isYes) {
         try {
-          const res = await fetch("/api/leads", {
+          const res = await fetch("/save-lead", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -122,6 +122,7 @@ export function LeadCaptureChat() {
               city: leadCity,
               consent: true,
               followupRequested: false,
+              source: "agent_freddy",
             }),
           });
           const data = await res.json();
