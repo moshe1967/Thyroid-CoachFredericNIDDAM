@@ -1,8 +1,11 @@
-import { type Inquiry, type InsertInquiry, inquiries } from "@shared/schema";
+import { type Inquiry, type InsertInquiry, inquiries, type Lead, type InsertLead, leads } from "@shared/schema";
 import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
+  createLead(lead: InsertLead): Promise<Lead>;
+  requestFollowup(id: number): Promise<Lead | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -12,6 +15,23 @@ export class DatabaseStorage implements IStorage {
       .values(insertInquiry)
       .returning();
     return inquiry;
+  }
+
+  async createLead(insertLead: InsertLead): Promise<Lead> {
+    const [lead] = await db
+      .insert(leads)
+      .values(insertLead)
+      .returning();
+    return lead;
+  }
+
+  async requestFollowup(id: number): Promise<Lead | undefined> {
+    const [lead] = await db
+      .update(leads)
+      .set({ followupRequested: true })
+      .where(eq(leads.id, id))
+      .returning();
+    return lead;
   }
 }
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { Section } from "@/components/Section";
+import { LeadCaptureChat } from "@/components/LeadCaptureChat";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Mail, CheckCircle2, ArrowRight, Activity, Heart, Clock } from "lucide-react";
@@ -314,19 +315,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Floating Action Button */}
-      <motion.a
-        href="mailto:fniddam@gmail.com?subject=Demande%20de%20contact"
-        className="fixed bottom-6 right-6 z-50 bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/30 rounded-full px-6 py-4 font-bold flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 group"
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1 }}
-      >
-        <Mail className="w-5 h-5 group-hover:animate-bounce" />
-        <span className="hidden sm:inline">Me contacter</span>
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-ping" />
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full" />
-      </motion.a>
+      <LeadCaptureChat />
     </div>
   );
 }
