@@ -3,6 +3,31 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
+const SITE_URL = "https://thyroid-coach-frederic-niddam.replit.app";
+const INDEXNOW_KEY = "aa8acd6b-f004-43c1-b09c-0dbc67dc57c0";
+
+async function submitToIndexNow() {
+  try {
+    const res = await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        host: new URL(SITE_URL).hostname,
+        key: INDEXNOW_KEY,
+        keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
+        urlList: [SITE_URL + "/"],
+      }),
+    });
+    if (res.ok || res.status === 202) {
+      console.log("[indexnow] Successfully submitted URL to Bing");
+    } else {
+      console.log(`[indexnow] Submission response: ${res.status}`);
+    }
+  } catch (e) {
+    console.log("[indexnow] Could not reach IndexNow API:", e);
+  }
+}
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -93,6 +118,9 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      if (process.env.NODE_ENV === "production") {
+        submitToIndexNow();
+      }
     },
   );
 })();
