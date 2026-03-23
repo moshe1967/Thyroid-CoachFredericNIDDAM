@@ -26,7 +26,8 @@ const saveleadSchema = z.object({
     .refine(
       (v) => VALID_CITIES.includes(normalizeCity(v)),
       "City must be Paris, Vincennes, or Saint-Mandé"
-    ),
+    )
+    .transform((v) => normalizeCity(v).replace(/-/g, " ").trim()),
   consent: z
     .literal(true, {
       errorMap: () => ({ message: "Consent must be explicitly true (GDPR)" }),
