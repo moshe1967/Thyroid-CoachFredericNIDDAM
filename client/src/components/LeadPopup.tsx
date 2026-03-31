@@ -15,7 +15,10 @@ export function LeadPopup() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Permanently hidden only after successful submission
     if (localStorage.getItem(STORAGE_KEY)) return;
+    // Hidden for this browser session if already dismissed
+    if (sessionStorage.getItem(STORAGE_KEY)) return;
     const t = setTimeout(() => setVisible(true), SHOW_DELAY_MS);
     return () => clearTimeout(t);
   }, []);
@@ -26,7 +29,8 @@ export function LeadPopup() {
 
   const dismiss = () => {
     setVisible(false);
-    localStorage.setItem(STORAGE_KEY, "1");
+    // Only block for this session — not permanently
+    sessionStorage.setItem(STORAGE_KEY, "1");
   };
 
   const validate = (value: string) => {
