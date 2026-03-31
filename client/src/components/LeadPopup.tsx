@@ -30,7 +30,7 @@ export function LeadPopup() {
   };
 
   const validate = (value: string) => {
-    if (!value.trim()) return "Veuillez saisir votre email.";
+    if (!value.trim()) return "Veuillez saisir votre adresse email.";
     if (!EMAIL_RE.test(value.trim())) return "Format d'email invalide.";
     return "";
   };
@@ -113,8 +113,8 @@ export function LeadPopup() {
                   className="text-center py-4 space-y-4"
                 >
                   <div className="text-5xl">✅</div>
-                  <h2 className="text-2xl font-bold text-slate-800">Thank you!</h2>
-                  <p className="text-slate-500">We will contact you soon.</p>
+                  <h2 className="text-2xl font-bold text-slate-800">Merci !</h2>
+                  <p className="text-slate-500">Frédéric vous contactera très bientôt.</p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="space-y-6">
@@ -127,10 +127,10 @@ export function LeadPopup() {
                       id="popup-title"
                       className="text-2xl md:text-3xl font-bold text-slate-900"
                     >
-                      I can help you
+                      Je peux vous aider
                     </h2>
                     <p className="text-slate-500 text-sm md:text-base">
-                      Enter your email to get free guidance
+                      Entrez votre email pour recevoir des conseils gratuits
                     </p>
                   </div>
 
@@ -146,7 +146,7 @@ export function LeadPopup() {
                         if (emailError) setEmailError(validate(e.target.value));
                       }}
                       onBlur={() => setEmailError(validate(email))}
-                      placeholder="your@email.com"
+                      placeholder="votre@email.com"
                       required
                       disabled={status === "loading"}
                       className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none bg-slate-50 placeholder:text-slate-400 transition-colors disabled:opacity-60 ${
@@ -165,8 +165,8 @@ export function LeadPopup() {
 
                   {/* GDPR note */}
                   <p className="text-[11px] text-slate-400 text-center leading-relaxed -mt-2">
-                    By clicking, you agree to be contacted by Frédéric Niddam.
-                    Your data is confidential and GDPR-compliant.
+                    En cliquant, vous acceptez d'être contacté(e) par Frédéric Niddam.
+                    Vos données sont confidentielles et conformes au RGPD.
                   </p>
 
                   {/* Submit */}
@@ -179,10 +179,10 @@ export function LeadPopup() {
                     {status === "loading" ? (
                       <span className="flex items-center justify-center gap-2">
                         <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                        Sending…
+                        Envoi…
                       </span>
                     ) : (
-                      "Get Help"
+                      "Recevoir mon aide"
                     )}
                   </button>
                 </form>
