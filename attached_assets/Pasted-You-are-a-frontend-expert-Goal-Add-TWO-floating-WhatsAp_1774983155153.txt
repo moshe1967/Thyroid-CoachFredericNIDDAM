@@ -1,0 +1,106 @@
+You are a frontend expert.
+
+Goal:
+Add TWO floating WhatsApp buttons to my website WITHOUT breaking layout or design.
+
+Phone number:
++330609472205
+
+Pre-filled message:
+"Bonjour, je peux vous aider et aider votre thyroïde"
+
+STRICT RULES:
+- Do NOT modify existing layout
+- Do NOT remove anything
+- Add clean, minimal, modern UI
+- Buttons must be responsive (mobile + desktop)
+
+TASKS:
+
+1. CREATE WHATSAPP LINKS
+
+Use this link format:
+https://wa.me/33609472205?text=Bonjour%2C%20je%20peux%20vous%20aider%20et%20aider%20votre%20thyro%C3%AFde
+
+2. ADD TWO FLOATING BUTTONS
+
+BUTTON 1:
+- Position: bottom right
+- Round green WhatsApp style
+- Icon only
+
+BUTTON 2:
+- Position: bottom left
+- Rectangle with text:
+  "💬 Je peux vous aider"
+- Slight animation (pulse or hover)
+
+3. ADD HTML
+
+Add before closing </body>:
+
+<a href="https://wa.me/33609472205?text=Bonjour%2C%20je%20peux%20vous%20aider%20et%20aider%20votre%20thyro%C3%AFde" 
+   class="whatsapp-float-right" 
+   target="_blank" 
+   aria-label="Contact WhatsApp">
+   💬
+</a>
+
+<a href="https://wa.me/33609472205?text=Bonjour%2C%20je%20peux%20vous%20aider%20et%20aider%20votre%20thyro%C3%AFde" 
+   class="whatsapp-float-left" 
+   target="_blank">
+   💬 Je peux vous aider
+</a>
+
+4. ADD CSS
+
+Add in CSS file or <style>:
+
+.whatsapp-float-right {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #25D366;
+  color: white;
+  font-size: 22px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+.whatsapp-float-left {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: #25D366;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 25px;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 9999;
+  transition: transform 0.2s ease;
+}
+
+.whatsapp-float-left:hover {
+  transform: scale(1.05);
+}
+
+5. MOBILE OPTIMIZATION
+
+Ensure buttons do not overlap existing chat widget.
+If conflict, slightly adjust bottom spacing.
+
+OUTPUT:
+- Updated HTML
+- Updated CSS
+
+IMPORTANT:
+Do not break anything.
