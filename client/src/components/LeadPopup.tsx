@@ -1,33 +1,48 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
-const STORAGE_KEY = "lead_popup_dismissed";
-const SHOW_DELAY_MS = 6_000;
+const STORAGE_KEY = "lead_popup_v2_done";
+const SHOW_DELAY_MS = 5_000;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LeadPopup() {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [serverError, setServerError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (dismissed) return;
-    const timer = setTimeout(() => setVisible(true), SHOW_DELAY_MS);
-    return () => clearTimeout(timer);
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    const t = setTimeout(() => setVisible(true), SHOW_DELAY_MS);
+    return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (visible) setTimeout(() => inputRef.current?.focus(), 300);
+  }, [visible]);
 
   const dismiss = () => {
     setVisible(false);
     localStorage.setItem(STORAGE_KEY, "1");
   };
 
+  const validate = (value: string) => {
+    if (!value.trim()) return "Veuillez saisir votre email.";
+    if (!EMAIL_RE.test(value.trim())) return "Format d'email invalide.";
+    return "";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || status === "loading") return;
+    const err = validate(email);
+    if (err) { setEmailError(err); return; }
+    setEmailError("");
+    setServerError("");
     setStatus("loading");
-    setErrorMsg("");
+
     try {
       const res = await fetch("/popup-lead", {
         method: "POST",
@@ -38,87 +53,143 @@ export function LeadPopup() {
       if (res.ok && data.success) {
         setStatus("success");
         localStorage.setItem(STORAGE_KEY, "1");
+        setTimeout(() => setVisible(false), 3_500);
       } else if (res.status === 409) {
         setStatus("success");
         localStorage.setItem(STORAGE_KEY, "1");
+        setTimeout(() => setVisible(false), 3_500);
       } else {
         setStatus("error");
-        setErrorMsg(data.message ?? "Une erreur est survenue.");
+        setServerError(data.message ?? "Une erreur est survenue.");
       }
     } catch {
       setStatus("error");
-      setErrorMsg("Impossible de contacter le serveur.");
+      setServerError("Impossible de contacter le serveur.");
     }
   };
 
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Aide thyroïde"
-          initial={{ opacity: 0, y: 24, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 16, scale: 0.95 }}
-          transition={{ duration: 0.28, ease: "easeOut" }}
-          className="fixed bottom-[7.5rem] right-5 z-[9999] w-[300px] bg-white rounded-2xl shadow-2xl shadow-blue-900/20 border border-slate-100 p-5"
-        >
-          <button
-            onClick={dismiss}
-            aria-label="Fermer"
-            className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 transition-colors"
+        <>
+          {/* Dark overlay — clicking it does nothing (modal is forced) */}
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+
+          {/* Centered modal card */}
+          <motion.div
+            key="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="popup-title"
+            initial={{ opacity: 0, scale: 0.88, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 16 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
           >
-            <X className="w-4 h-4" />
-          </button>
-
-          {status === "success" ? (
-            <div className="text-center py-2 space-y-2">
-              <div className="text-3xl">✅</div>
-              <p className="font-semibold text-slate-800">Merci !</p>
-              <p className="text-sm text-slate-500">Frédéric vous contactera très bientôt.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <p className="font-bold text-slate-800 text-base leading-snug">
-                  Problème de thyroïde ?
-                </p>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  Je peux vous aider, homme ou femme !
-                </p>
-              </div>
-
-              <input
-                data-testid="input-popup-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Votre email"
-                required
-                disabled={status === "loading"}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary bg-slate-50 placeholder:text-slate-400 disabled:opacity-60"
-              />
-
-              {status === "error" && (
-                <p className="text-xs text-red-500">{errorMsg}</p>
-              )}
-
-              <p className="text-[11px] text-slate-400 leading-tight">
-                En cliquant, vous acceptez d'être contacté(e) par Frédéric Niddam. Données confidentielles, conformément au RGPD.
-              </p>
-
+            <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+              {/* Close button */}
               <button
-                data-testid="button-popup-submit"
-                type="submit"
-                disabled={status === "loading" || !email.trim()}
-                className="w-full py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
+                onClick={dismiss}
+                aria-label="Fermer"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                data-testid="button-popup-close"
               >
-                {status === "loading" ? "Envoi…" : "Recevoir mon aide"}
+                <X className="w-4 h-4" />
               </button>
-            </form>
-          )}
-        </motion.div>
+
+              {status === "success" ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-4 space-y-4"
+                >
+                  <div className="text-5xl">✅</div>
+                  <h2 className="text-2xl font-bold text-slate-800">Thank you!</h2>
+                  <p className="text-slate-500">We will contact you soon.</p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                  {/* Header */}
+                  <div className="text-center space-y-2">
+                    <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                      🦋
+                    </div>
+                    <h2
+                      id="popup-title"
+                      className="text-2xl md:text-3xl font-bold text-slate-900"
+                    >
+                      I can help you
+                    </h2>
+                    <p className="text-slate-500 text-sm md:text-base">
+                      Enter your email to get free guidance
+                    </p>
+                  </div>
+
+                  {/* Email input */}
+                  <div className="space-y-1.5">
+                    <input
+                      ref={inputRef}
+                      data-testid="input-popup-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (emailError) setEmailError(validate(e.target.value));
+                      }}
+                      onBlur={() => setEmailError(validate(email))}
+                      placeholder="your@email.com"
+                      required
+                      disabled={status === "loading"}
+                      className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none bg-slate-50 placeholder:text-slate-400 transition-colors disabled:opacity-60 ${
+                        emailError
+                          ? "border-red-400 focus:border-red-400"
+                          : "border-slate-200 focus:border-primary"
+                      }`}
+                    />
+                    {emailError && (
+                      <p className="text-xs text-red-500 pl-1">{emailError}</p>
+                    )}
+                    {status === "error" && serverError && (
+                      <p className="text-xs text-red-500 pl-1">{serverError}</p>
+                    )}
+                  </div>
+
+                  {/* GDPR note */}
+                  <p className="text-[11px] text-slate-400 text-center leading-relaxed -mt-2">
+                    By clicking, you agree to be contacted by Frédéric Niddam.
+                    Your data is confidential and GDPR-compliant.
+                  </p>
+
+                  {/* Submit */}
+                  <button
+                    data-testid="button-popup-submit"
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="w-full py-3.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm md:text-base"
+                  >
+                    {status === "loading" ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        Sending…
+                      </span>
+                    ) : (
+                      "Get Help"
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
