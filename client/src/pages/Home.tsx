@@ -119,7 +119,8 @@ export default function Home() {
             <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-slate-200 relative z-10">
                <img 
                 src="/images/freddy.jpg" 
-                alt="Frédéric Niddam - Coach Santé Thyroïde" 
+                alt="Frédéric Niddam - Coach Santé Thyroïde"
+                loading="lazy"
                 className="object-cover w-full h-full"
               />
             </div>
@@ -172,7 +173,8 @@ export default function Home() {
             <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 flex flex-col md:flex-row items-center gap-8 max-w-3xl mx-auto">
                <img 
                 src="/images/anatomy.jpg" 
-                alt="Illustration Hypophyse et Thyroïde" 
+                alt="Illustration Hypophyse et Thyroïde"
+                loading="lazy"
                 className="w-64 h-auto rounded-2xl shadow-md"
               />
             <div className="text-left space-y-4">

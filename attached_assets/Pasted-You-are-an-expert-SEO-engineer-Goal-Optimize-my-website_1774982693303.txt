@@ -1,0 +1,87 @@
+You are an expert SEO engineer.
+
+Goal:
+Optimize my website for Google and Bing SEO WITHOUT changing design or layout.
+
+Website URL (MANDATORY USE EVERYWHERE):
+https://thyroid-coach-frederic-niddam.replit.app/
+
+STRICT RULES:
+- Do NOT modify CSS or UI
+- Do NOT break layout
+- Only improve SEO, metadata, structure, and performance
+
+TASKS:
+
+1. HEAD SEO (USE THE URL EVERYWHERE)
+- Set:
+<title>Coach Thyroïde France | Frederic Niddam</title>
+
+<meta name="description" content="Coach santé thyroïde en France. Spécialiste Hashimoto, fatigue, poids. Réservez votre accompagnement personnalisé.">
+
+<meta name="robots" content="index, follow">
+
+<link rel="canonical" href="https://thyroid-coach-frederic-niddam.replit.app/">
+
+<meta property="og:title" content="Coach Thyroïde Frederic Niddam">
+<meta property="og:description" content="Accompagnement thyroïde personnalisé en France.">
+<meta property="og:url" content="https://thyroid-coach-frederic-niddam.replit.app/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="summary_large_image">
+
+2. STRUCTURED DATA (CRITICAL)
+
+Add JSON-LD:
+
+{
+  "@context": "https://schema.org",
+  "@type": "HealthService",
+  "name": "Coach Santé Thyroïde Frederic Niddam",
+  "url": "https://thyroid-coach-frederic-niddam.replit.app/",
+  "areaServed": "France",
+  "description": "Coaching spécialisé thyroïde, Hashimoto, fatigue et perte de poids.",
+  "serviceType": "Thyroid coaching"
+}
+
+3. HTML STRUCTURE
+- Ensure only ONE <h1>
+- Optimize headings hierarchy
+- Add ALT text to all images
+- Improve semantic tags
+
+4. PERFORMANCE
+- Add loading="lazy" to images
+- Add defer to scripts
+
+5. INTERNAL LINKS
+- Optimize anchor text for:
+  - consultation
+  - réservation
+  - thyroïde
+  - Hashimoto
+
+6. FILES TO CREATE
+
+Create /robots.txt:
+
+User-agent: *
+Allow: /
+Sitemap: https://thyroid-coach-frederic-niddam.replit.app/sitemap.xml
+
+Create /sitemap.xml:
+
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://thyroid-coach-frederic-niddam.replit.app/</loc>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+
+OUTPUT:
+- Provide updated index.html
+- Provide robots.txt
+- Provide sitemap.xml
+
+IMPORTANT:
+Do not remove anything. Only enhance SEO.
