@@ -113,6 +113,32 @@ export async function registerRoutes(
     }
   });
 
+  // Lightweight popup lead capture (email only — city not required)
+  app.post("/popup-lead", async (req, res) => {
+    const rawEmail = req.body?.email;
+    if (!rawEmail || typeof rawEmail !== "string") {
+      return res.status(400).json({ success: false, message: "Email requis" });
+    }
+    const email = rawEmail.toLowerCase().trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailValid) {
+      return res.status(400).json({ success: false, message: "Email invalide" });
+    }
+    const existing = await storage.findLeadByEmail(email);
+    if (existing) {
+      return res.status(409).json({ success: false, message: "Email déjà enregistré" });
+    }
+    await storage.createLead({
+      email,
+      city: "non renseignée",
+      consent: true,
+      followupRequested: false,
+      source: "popup",
+    });
+    console.log("Popup lead:", email);
+    return res.status(201).json({ success: true });
+  });
+
   app.get("/leads", async (_req, res) => {
     const allLeads = await storage.getAllLeads();
     return res.json(allLeads);

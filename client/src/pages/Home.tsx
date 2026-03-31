@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { Section } from "@/components/Section";
 import { LeadCaptureChat } from "@/components/LeadCaptureChat";
 import { WhatsAppButton, WhatsAppLeftButton } from "@/components/WhatsAppButton";
+import { LeadPopup } from "@/components/LeadPopup";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Mail, CheckCircle2, ArrowRight, Activity, Heart, Clock } from "lucide-react";
@@ -318,6 +319,7 @@ export default function Home() {
         </div>
       </footer>
 
+      <LeadPopup />
       <WhatsAppButton />
       <WhatsAppLeftButton />
       <LeadCaptureChat />
