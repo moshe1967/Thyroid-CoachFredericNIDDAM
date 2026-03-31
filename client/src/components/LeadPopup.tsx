@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
-const STORAGE_KEY = "lead_popup_v2_done";
+const STORAGE_KEY = "lead_popup_v3_fr";
 const SHOW_DELAY_MS = 5_000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
