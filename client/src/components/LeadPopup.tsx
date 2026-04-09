@@ -6,10 +6,14 @@ const STORAGE_KEY = "lead_popup_v3_fr";
 const SHOW_DELAY_MS = 5_000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const ZIP_RE = /^\d{5}$/;
+
 export function LeadPopup() {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [zip, setZip] = useState("");
+  const [zipError, setZipError] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [serverError, setServerError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,17 +37,27 @@ export function LeadPopup() {
     sessionStorage.setItem(STORAGE_KEY, "1");
   };
 
-  const validate = (value: string) => {
+  const validateEmail = (value: string) => {
     if (!value.trim()) return "Veuillez saisir votre adresse email.";
     if (!EMAIL_RE.test(value.trim())) return "Format d'email invalide.";
     return "";
   };
 
+  const validateZip = (value: string) => {
+    if (!value.trim()) return "Veuillez saisir votre code postal.";
+    if (!ZIP_RE.test(value.trim())) return "Code postal invalide (5 chiffres).";
+    return "";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const err = validate(email);
-    if (err) { setEmailError(err); return; }
+    const emailErr = validateEmail(email);
+    const zipErr = validateZip(zip);
+    if (emailErr) setEmailError(emailErr);
+    if (zipErr) setZipError(zipErr);
+    if (emailErr || zipErr) return;
     setEmailError("");
+    setZipError("");
     setServerError("");
     setStatus("loading");
 
@@ -51,7 +65,7 @@ export function LeadPopup() {
       const res = await fetch("/popup-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), zip: zip.trim() }),
       });
       const data = await res.json();
       if (res.ok && data.success) {

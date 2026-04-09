@@ -22,6 +22,7 @@ export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   city: text("city").notNull(),
+  zip: text("zip"),
   consent: boolean("consent").notNull().default(false),
   followupRequested: boolean("followup_requested").notNull().default(false),
   source: text("source"),

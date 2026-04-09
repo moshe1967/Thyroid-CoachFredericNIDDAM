@@ -113,9 +113,10 @@ export async function registerRoutes(
     }
   });
 
-  // Lightweight popup lead capture (email only — city not required)
+  // Lightweight popup lead capture (email + optional zip)
   app.post("/popup-lead", async (req, res) => {
     const rawEmail = req.body?.email;
+    const rawZip = req.body?.zip;
     if (!rawEmail || typeof rawEmail !== "string") {
       return res.status(400).json({ success: false, message: "Email requis" });
     }
@@ -124,6 +125,15 @@ export async function registerRoutes(
     if (!emailValid) {
       return res.status(400).json({ success: false, message: "Email invalide" });
     }
+    // Validate French ZIP if provided (5 digits)
+    let zip: string | null = null;
+    if (rawZip && typeof rawZip === "string") {
+      const zipClean = rawZip.trim();
+      if (!/^\d{5}$/.test(zipClean)) {
+        return res.status(400).json({ success: false, message: "Code postal invalide (5 chiffres)" });
+      }
+      zip = zipClean;
+    }
     const existing = await storage.findLeadByEmail(email);
     if (existing) {
       return res.status(409).json({ success: false, message: "Email déjà enregistré" });
@@ -131,11 +141,12 @@ export async function registerRoutes(
     await storage.createLead({
       email,
       city: "non renseignée",
+      zip,
       consent: true,
       followupRequested: false,
       source: "popup",
     });
-    console.log("Popup lead:", email);
+    console.log("Popup lead:", email, zip ?? "no zip");
     return res.status(201).json({ success: true });
   });
 
