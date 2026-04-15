@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://moshe1967.github.io/Thyroid-CoachFredericNIDDAM/sitemap.xml
