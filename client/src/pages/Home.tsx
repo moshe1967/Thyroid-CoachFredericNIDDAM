@@ -119,7 +119,7 @@ export default function Home() {
           <div className="relative">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-slate-200 relative z-10">
                <img 
-                src="images/freddy.jpg" 
+                src="https://raw.githubusercontent.com/moshe1967/Thyroid-CoachFredericNIDDAM/main/client/public/images/freddy.jpg"
                 alt="Frédéric Niddam - Coach Santé Thyroïde"
                 loading="lazy"
                 className="object-cover w-full h-full"
